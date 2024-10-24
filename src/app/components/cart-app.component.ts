@@ -56,10 +56,10 @@ export class CartAppComponent implements OnInit{
     this.items = this.items.filter(
       item => item.product.id !== id
     );
-    // if(this.items.length === 0){
-    //   sessionStorage.removeItem('cart');
-    //   sessionStorage.clear();
-    // }
+    if(this.items.length === 0){
+      sessionStorage.removeItem('cart');
+      sessionStorage.clear();
+    }
     // this.calculateTotal();
     // this.saveSession();
   }
