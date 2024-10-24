@@ -1,0 +1,11 @@
+<navbar [items]="items" (showCartEventEmitter)="openCloseCart()" />
+<div class="container my-4">
+    <h2>Catalogo de productos de App!</h2>
+    <app-catalog [products]="products" (productEventEmitter)="onAddCart($event)" />
+
+    @if (showCart) {
+        <cart-modal [items]="items" 
+        (idProductEventEmitter)="onDeleteCart($event)"
+        (closeCartEventEmitter)="openCloseCart()"/>
+    }
+</div>
