@@ -109,12 +109,11 @@ export class CartAppComponent implements OnInit{
             }
           )
           swalWithBootstrapButtons.fire({
-            title: "Eliminado!",
+            title: "Eliminado",
             text: "Tu producto se elimino del carro",
             icon: "success"
           });
         } else if (
-          /* Read more about handling dismissals below */
           result.dismiss === Swal.DismissReason.cancel
         ) {
           swalWithBootstrapButtons.fire({
