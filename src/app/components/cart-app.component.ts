@@ -5,6 +5,9 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { SharingDataService } from '../services/sharing-data.service';
 import Swal from 'sweetalert2';
+import { ItemsState } from '../store/item.reducer';
+import { Store } from '@ngrx/store';
+import { add, remove, total } from '../store/item.action';
 
 @Component({
   selector: 'cart-app',
@@ -21,12 +24,16 @@ export class CartAppComponent implements OnInit{
   
   constructor(private service: ProductService,  
     private shareDataService: SharingDataService,
-    private router: Router) {}
+    private router: Router,
+     private store: Store<{items: ItemsState}>) {
+      this.store.select('items').subscribe(state => {
+        this.items = state.items,
+        this.total = state.total
+      });
+     }
 
 
   ngOnInit(): void {
-  this.items = JSON.parse(sessionStorage.getItem('cart') || '[]') ; 
-  this.calculateTotal();
   this.onDeleteCart();
   this.onAddCart();
   }
@@ -34,21 +41,8 @@ export class CartAppComponent implements OnInit{
   onAddCart(): void {
     this.shareDataService.productEventEmitter.subscribe(
       product =>{
-        const hasItem = this.items.find(item => item.product.id === product.id);
-        if(hasItem){
-          this.items = this.items.map(item => {
-            if(item.product.id === product.id){
-              return {
-                ...item, quantity: item.quantity +1
-              }
-            }
-            return item;
-          }
-          );
-        } else{
-          this.items = [... this.items, { product: {... product}, quantity: 1}]
-        }
-        this.calculateTotal();
+        this.store.dispatch(add({product}));
+        this.store.dispatch(total())  
         this.saveSession();
 
         this.router.navigate(['/cart'], {
@@ -89,14 +83,12 @@ export class CartAppComponent implements OnInit{
         reverseButtons: true
       }).then((result) => {
         if (result.isConfirmed) {
-          this.items = this.items.filter(
-            item => item.product.id !== id
-          );
           if(this.items.length === 0){
             sessionStorage.removeItem('cart');
             sessionStorage.clear();
           }
-          this.calculateTotal();
+          this.store.dispatch(remove({id}));
+          this.store.dispatch(total())  
           this.saveSession();
     
           this.router.navigateByUrl('/', {skipLocationChange: true}).then(
@@ -127,9 +119,6 @@ export class CartAppComponent implements OnInit{
   }
 
   calculateTotal(): void{
-    this.total = this.items.reduce(
-      (accumulator, item) => accumulator + item.quantity * item.product.price, 0 
-    )
     this.saveSession();
   }
 
